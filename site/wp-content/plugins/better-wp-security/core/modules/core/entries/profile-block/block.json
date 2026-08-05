@@ -1,0 +1,11 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
+  "name": "ithemes-security/user-profile-settings",
+  "title": "Kadence Security User Security Settings",
+  "category": "widgets",
+  "editorScript": "itsec-core-profile-block",
+  "viewScript": "itsec-core-profile-front",
+  "editorStyle": "itsec-core-profile-block",
+  "style": "itsec-core-profile-front"
+}

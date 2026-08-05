@@ -1,0 +1,269 @@
+/**
+ * Serious Slider styling for the block editor elements
+ */
+
+.cryout-sblock-block {
+    border: 2px solid #c3c4c7;
+    border-radius: 4px;
+    overflow: hidden;
+    background: #f6f7f7;
+    min-height: 72px;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+.cryout-sblock-loading {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 16px;
+    color: #757575;
+    font-size: 13px;
+}
+
+.cryout-sblock-error {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 16px;
+    color: #cc1818;
+    font-size: 13px;
+}
+.cryout-sblock-error .dashicons { color: #cc1818; }
+
+.cryout-sblock-preview-wrap { background: #fff; }
+
+.cryout-sblock-preview-header {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 9px 12px;
+    background: #1d2327;
+    color: #fff;
+    font-size: 13px;
+}
+.cryout-sblock-preview-header .dashicons { color: #72aee6; font-size: 18px; width: 18px; height: 18px; }
+.cryout-sblock-preview-header strong { font-size: 13px; }
+
+.cryout-sblock-count {
+    color: #a0a0a0;
+    margin-right: auto; 
+}
+
+.cryout-sblock-edit-slides-btn.components-button {
+    font-size: 12px;
+    color: #72aee6 !important;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    padding: 2px 8px;
+    border: 1px solid rgba(114,174,230,.4);
+    border-radius: 3px;
+    height: auto;
+    line-height: 1.4;
+    flex-shrink: 0;
+}
+.cryout-sblock-edit-slides-btn.components-button:hover {
+    background: rgba(114,174,230,.15);
+    color: #fff !important;
+    border-color: #72aee6;
+}
+.cryout-sblock-edit-slides-btn .dashicons {
+    font-size: 13px !important;
+    width: 13px !important;
+    height: 13px !important;
+    color: inherit !important;
+}
+
+.cryout-sblock-thumb-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 12px;
+    background: #f6f7f7;
+	cursor: default;
+}
+
+.cryout-sblock-thumb {
+    width: calc(25% - 8px);
+    min-width: 150px;
+    border-radius: 3px;
+    overflow: hidden;
+    border: 1px solid #ddd;
+    background: #fff;
+    font-size: 11px;
+    text-align: center;
+}
+.cryout-sblock-thumb img { 
+	width: 100%;
+	height: 100px;
+	object-fit: cover;
+	display: block;
+}
+
+.cryout-sblock-no-thumb {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 66px;
+    background: #eee;
+    color: #bbb;
+    font-size: 28px !important;
+    width: 100% !important;
+}
+
+.cryout-sblock-thumb-label {
+    display: flex;
+    flex-direction: column;
+    padding: 4px 3px 2px;
+    color: #555;
+}
+
+.cryout-sblock-thumb-title {
+    display: block;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 11px;
+}
+
+.cryout-sblock-slide-edit-link {
+    display: block;
+    font-size: 10px;
+    color: #2271b1;
+    text-decoration: none;
+    padding-bottom: 2px;
+    flex-shrink: 0;  /* never shrink or truncate */
+}
+
+.cryout-sblock-slide-edit-link:hover {
+    text-decoration: underline;
+}
+
+.cryout-sblock-override-strip {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 6px 12px;
+    background: #fcf0d4;
+    border-top: 1px solid #f0d080;
+    font-size: 12px;
+	cursor: default;
+}
+.cryout-sblock-override-indicator {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    color: #7a5c00;
+    font-weight: 500;
+}
+.cryout-sblock-override-indicator .dashicons { font-size: 14px; width: 14px; height: 14px; }
+
+.cryout-sblock-panel-actions {
+    margin-top: 8px;
+}
+.cryout-sblock-create-btn.components-button {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    text-decoration: none;
+	margin-bottom: 1em;
+}
+.cryout-sblock-create-btn .dashicons { font-size: 14px; width: 14px; height: 14px; }
+
+.cryout-sblock-sc-hint { }
+
+.cryout-sblock-override-description {
+    margin: 0.7em 0 0;
+    padding: 0.4em;
+    background: #f0f6fc;
+    border-left: 3px solid #72aee6;
+    border-radius: 0 3px 3px 0;
+}
+.cryout-sblock-override-description p {
+    margin: 0;
+    font-size: 12px;
+    color: #1d4a7a;
+    font-style: italic;
+}
+
+.cryout-sblock-field-wrap {
+    position: relative;
+    margin-bottom: 16px;
+}
+
+.cryout-sblock-field-wrap.cryout-sblock-field-overridden > .components-base-control {
+    background: #fff8e5;
+    padding: 4px 6px 2px;
+    border: 1px solid #f0d080;
+    margin-bottom: 2px;
+}
+
+.cryout-sblock-field-reset.components-button {
+    font-size: 11px;
+    height: auto;
+    padding: 0 2px;
+    color: #b32d2e;
+    margin-top: 2px;
+    display: block;
+}
+
+.cryout-sblock-color-row {
+    margin-bottom: 16px;
+}
+.cryout-sblock-color-row.cryout-sblock-field-overridden {
+    background: #fff8e5;
+    border: 1px solid #f0d080;
+    padding: 6px 6px 2px;
+}
+.cryout-sblock-color-row-header {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 4px;
+}
+.cryout-sblock-field-label {
+    font-size: 11px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #1e1e1e;
+    flex: 1;
+    min-width: 80px;
+}
+.cryout-sblock-color-row-controls {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+.cryout-sblock-color-swatch {
+    display: inline-block;
+    width: 22px;
+    height: 22px;
+    border: 1px solid rgba(0,0,0,.2);
+    flex-shrink: 0;
+    cursor: help;
+}
+.cryout-sblock-color-row .components-color-picker > div:nth-child(2) > .components-h-stack > button {
+    display: none !important;
+}
+
+/* quirks to prevent broken dragging */
+[data-type="cryout-serious-slider/slider"] .block-editor-block-list__block-html-convert-button,
+[data-type="cryout-serious-slider/slider"] .is-draggable {
+    pointer-events: none;
+}
+.wp-block[data-type="cryout-serious-slider/slider"] {
+    -webkit-user-drag: none;
+    user-drag: none;
+    -khtml-user-drag: none;
+}
+.wp-block[data-type="cryout-serious-slider/slider"] * {
+    -webkit-user-drag: none;
+    user-drag: none;
+}
+
+/* FIN */
