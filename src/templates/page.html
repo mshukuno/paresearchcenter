@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, user-scalable=yes, initial-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<title>{{ title }}</title>
+<link rel="icon" href="/wp-content/uploads/2017/08/PARC_final-1.png" type="image/png">
+{% if canonical %}<link rel="canonical" href="{{ canonical }}">{% endif %}
+{% include 'head-assets.html' %}
+</head>
+<body class="{{ body_class }}" itemscope itemtype="http://schema.org/WebPage">
+<div id="site-wrapper">
+{% include 'header.html' %}
+{{ breadcrumbs | safe }}
+<div id="content" class="cryout">
+{{ container | safe }}
+{% include 'colophon.html' %}
+</div>
+{% include 'footer.html' %}
+</div>
+{% include 'body-scripts.html' %}
+</body>
+</html>
