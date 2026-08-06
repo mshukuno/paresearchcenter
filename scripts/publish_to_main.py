@@ -12,6 +12,8 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from _paths import DEV_BRANCH, DOCS_DIR, MAIN_BRANCH, REPO_ROOT, SITE_OUT
 
+STASH_MESSAGE = "publish-to-main-auto"
+
 MAIN_README = """# Physical Activity Research Center
 
 Static site published to GitHub Pages from this branch.
@@ -40,18 +42,62 @@ DEV_ONLY_PATHS = (
 )
 
 
+class GitError(RuntimeError):
+    pass
+
+
 def run(cmd: list[str], *, check: bool = True) -> subprocess.CompletedProcess[str]:
     print("+", " ".join(cmd))
-    return subprocess.run(cmd, cwd=REPO_ROOT, check=check, text=True, capture_output=True)
+    result = subprocess.run(cmd, cwd=REPO_ROOT, text=True, capture_output=True)
+    if result.stdout:
+        print(result.stdout.rstrip())
+    if result.stderr:
+        print(result.stderr.rstrip(), file=sys.stderr)
+    if check and result.returncode != 0:
+        raise GitError(
+            f"Command failed ({result.returncode}): {' '.join(cmd)}\n"
+            f"{result.stderr or result.stdout or '(no output)'}"
+        )
+    return result
 
 
 def current_branch() -> str:
     return run(["git", "branch", "--show-current"]).stdout.strip()
 
 
+def worktree_dirty() -> bool:
+    return bool(run(["git", "status", "--porcelain"]).stdout.strip())
+
+
+def stash_if_dirty() -> bool:
+    if not worktree_dirty():
+        return False
+    print("Stashing local changes before branch switch…")
+    run(["git", "stash", "push", "-u", "-m", STASH_MESSAGE])
+    return True
+
+
+def pop_stash_if_any() -> None:
+    listed = run(["git", "stash", "list"], check=False).stdout
+    if STASH_MESSAGE not in listed:
+        return
+    print("Restoring stashed local changes…")
+    result = run(["git", "stash", "pop"], check=False)
+    if result.returncode != 0:
+        print(
+            "Warning: could not restore stash automatically. Run `git stash list` and `git stash pop`.",
+            file=sys.stderr,
+        )
+
+
+def checkout_branch(name: str) -> None:
+    run(["git", "checkout", name])
+
+
 def build_site(*, skip_build: bool) -> None:
     if not skip_build:
         run([sys.executable, "src/refactor.py", "build", "--site-base", "/paresearchcenter"])
+    run([sys.executable, "scripts/patch_search_page.py"])
     run([sys.executable, "scripts/rebuild_search_index.py"])
     run([sys.executable, "scripts/install_site_search_js.py"])
 
@@ -62,24 +108,51 @@ def copy_tree(src: Path, dst: Path) -> None:
     shutil.copytree(src, dst)
 
 
+def update_main_tree(staging: Path, *, message: str, push: bool) -> None:
+    copy_tree(staging, DOCS_DIR)
+    (REPO_ROOT / "README.md").write_text(MAIN_README, encoding="utf-8")
+
+    run(["git", "add", "docs", "README.md"])
+    for rel in DEV_ONLY_PATHS:
+        run(["git", "rm", "-rf", "--ignore-unmatch", rel])
+
+    status = run(["git", "status", "--porcelain"]).stdout.strip()
+    if not status:
+        print("Nothing to publish — docs/ already matches dist/.")
+        return
+
+    run(["git", "commit", "-m", message])
+    if push:
+        run(["git", "push", "origin", MAIN_BRANCH])
+
+
 def clean_main_layout(*, push: bool, message: str) -> None:
     """One-time (or occasional) cleanup: main keeps docs/ + README only."""
-    run(["git", "fetch", "origin"])
-    run(["git", "checkout", MAIN_BRANCH])
+    branch = current_branch()
+    if branch != DEV_BRANCH:
+        raise SystemExit(f"Run from {DEV_BRANCH} (current: {branch})")
+
+    stashed = stash_if_dirty()
     try:
-        (REPO_ROOT / "README.md").write_text(MAIN_README, encoding="utf-8")
-        run(["git", "add", "README.md"])
-        for rel in DEV_ONLY_PATHS:
-            run(["git", "rm", "-rf", "--ignore-unmatch", rel])
-        status = run(["git", "status", "--porcelain"]).stdout.strip()
-        if not status:
-            print("main is already docs-only.")
-            return
-        run(["git", "commit", "-m", message])
-        if push:
-            run(["git", "push", "origin", MAIN_BRANCH])
+        run(["git", "fetch", "origin"])
+        checkout_branch(MAIN_BRANCH)
+        try:
+            (REPO_ROOT / "README.md").write_text(MAIN_README, encoding="utf-8")
+            run(["git", "add", "README.md"])
+            for rel in DEV_ONLY_PATHS:
+                run(["git", "rm", "-rf", "--ignore-unmatch", rel])
+            status = run(["git", "status", "--porcelain"]).stdout.strip()
+            if not status:
+                print("main is already docs-only.")
+                return
+            run(["git", "commit", "-m", message])
+            if push:
+                run(["git", "push", "origin", MAIN_BRANCH])
+        finally:
+            checkout_branch(DEV_BRANCH)
     finally:
-        run(["git", "checkout", DEV_BRANCH])
+        if stashed:
+            pop_stash_if_any()
 
 
 def publish(*, message: str, push: bool, skip_build: bool) -> None:
@@ -98,27 +171,17 @@ def publish(*, message: str, push: bool, skip_build: bool) -> None:
         copy_tree(SITE_OUT, staging)
         (staging / ".nojekyll").touch(exist_ok=True)
 
-        run(["git", "fetch", "origin"])
-        run(["git", "checkout", MAIN_BRANCH])
-
+        stashed = stash_if_dirty()
         try:
-            copy_tree(staging, DOCS_DIR)
-            (REPO_ROOT / "README.md").write_text(MAIN_README, encoding="utf-8")
-
-            run(["git", "add", "docs", "README.md"])
-            for rel in DEV_ONLY_PATHS:
-                run(["git", "rm", "-rf", "--ignore-unmatch", rel])
-
-            status = run(["git", "status", "--porcelain"]).stdout.strip()
-            if not status:
-                print("Nothing to publish — docs/ already matches dist/.")
-                return
-
-            run(["git", "commit", "-m", message])
-            if push:
-                run(["git", "push", "origin", MAIN_BRANCH])
+            run(["git", "fetch", "origin"])
+            checkout_branch(MAIN_BRANCH)
+            try:
+                update_main_tree(staging, message=message, push=push)
+            finally:
+                checkout_branch(DEV_BRANCH)
         finally:
-            run(["git", "checkout", DEV_BRANCH])
+            if stashed:
+                pop_stash_if_any()
 
 
 def main() -> None:
@@ -147,18 +210,21 @@ def main() -> None:
     )
     args = parser.parse_args()
 
-    if args.clean_main_only:
-        clean_main_layout(
-            push=args.push,
-            message=args.message or "Make main branch docs-only for GitHub Pages",
-        )
-        return
+    try:
+        if args.clean_main_only:
+            clean_main_layout(
+                push=args.push,
+                message=args.message or "Make main branch docs-only for GitHub Pages",
+            )
+            return
 
-    if args.build_only:
-        build_site(skip_build=args.skip_build)
-        return
+        if args.build_only:
+            build_site(skip_build=args.skip_build)
+            return
 
-    publish(message=args.message, push=args.push, skip_build=args.skip_build)
+        publish(message=args.message, push=args.push, skip_build=args.skip_build)
+    except GitError as exc:
+        raise SystemExit(str(exc)) from exc
 
 
 if __name__ == "__main__":
