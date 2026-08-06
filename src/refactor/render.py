@@ -1,21 +1,26 @@
 """Phase 3: render slim HTML pages from templates + extracted content."""
 from __future__ import annotations
 
+from datetime import date
 from pathlib import Path
 
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 
 from . import config
 from .config import CONTENT_DIR, PARTIALS_DIR, SITE_OUT, SITE_SRC, TEMPLATES_DIR
+from .assets import sync_assets
 from .extract import PageContent, extract_page_content, save_page_content
 
 
 def _env() -> Environment:
-    return Environment(
+    env = Environment(
         loader=FileSystemLoader([str(TEMPLATES_DIR), str(PARTIALS_DIR)]),
         autoescape=select_autoescape(["html", "xml"]),
         keep_trailing_newline=True,
     )
+    env.globals["current_year"] = date.today().year
+    env.globals["copyright_start_year"] = 2018
+    return env
 
 
 def _load_content(page_rel: str) -> PageContent:
