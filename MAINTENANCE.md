@@ -14,6 +14,16 @@ In the repo **Settings → Pages → Build and deployment**:
 
 No GitHub Actions workflow is needed. Nothing is built on GitHub.
 
+**Asset paths:** HTML uses root-absolute paths like `/wp-content/...`. On a GitHub **project** site (`https://<user>.github.io/<repo>/`), those must include the repo name. The build defaults to `--site-base /paresearchcenter`. Renaming the publish folder to `/docs` does **not** change the URL — only the repo name in the path matters.
+
+For local preview from `dist/`, rebuild with an empty base:
+
+```powershell
+python src/refactor.py build --site-base ""
+```
+
+For a **custom domain** at the site root, also use `--site-base ""`.
+
 If Pages fails with a Jekyll or Node.js build error, confirm the source is **Deploy from a branch** (not GitHub Actions) and that `dist/.nojekyll` exists on `main`. Disable any auto-added Jekyll workflow under **Actions**.
 
 ## Yearly task (start of each year)

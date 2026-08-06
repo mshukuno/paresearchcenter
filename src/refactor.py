@@ -22,6 +22,7 @@ Examples:
 from __future__ import annotations
 
 import argparse
+import os
 import sys
 from pathlib import Path
 
@@ -109,8 +110,11 @@ def cmd_build(_: argparse.Namespace) -> None:
         print("No extracted content found. Run: python src/refactor.py extract-content --all")
         sys.exit(1)
     paths = render_all(sync_static=True)
-    print(f"Built {len(paths)} pages into {config.SITE_OUT}/")
+    base = config.SITE_BASE_PATH or "(site root)"
+    print(f"Built {len(paths)} pages into {config.SITE_OUT}/ (site base: {base})")
     print("Serve locally:  cd dist && python -m http.server 8000")
+    if config.SITE_BASE_PATH:
+        print("Local preview note: rebuild with --site-base \"\" for root-absolute paths from dist/.")
 
 
 def cmd_prune(args: argparse.Namespace) -> None:
@@ -155,6 +159,11 @@ def cmd_analyze_refs(_: argparse.Namespace) -> None:
 def main() -> None:
     parser = argparse.ArgumentParser(description="PARC static site refactor pipeline")
     parser.add_argument("--dry-run", action="store_true", help="Preview without writing files")
+    parser.add_argument(
+        "--site-base",
+        default=os.environ.get("PARC_SITE_BASE", config.SITE_BASE_PATH),
+        help='Prefix for root-absolute URLs (default: /paresearchcenter; use "" for site root)',
+    )
     sub = parser.add_subparsers(dest="command", required=True)
 
     sub.add_parser("inventory", help="Phase 1: scan site/ and report stats")
@@ -193,6 +202,8 @@ def main() -> None:
     args = parser.parse_args()
     if args.dry_run:
         config.DRY_RUN = True
+    if getattr(args, "site_base", None) is not None:
+        config.SITE_BASE_PATH = config._normalize_base_path(args.site_base)
 
     commands = {
         "inventory": cmd_inventory,

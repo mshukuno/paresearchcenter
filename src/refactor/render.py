@@ -10,6 +10,7 @@ from . import config
 from .config import CONTENT_DIR, PARTIALS_DIR, SITE_OUT, SITE_SRC, TEMPLATES_DIR
 from .assets import sync_assets
 from .extract import PageContent, extract_page_content, save_page_content
+from .paths import prefix_root_paths
 
 
 def _env() -> Environment:
@@ -50,6 +51,7 @@ def render_page(page_rel: str, out_root: Path = SITE_OUT) -> Path:
         breadcrumbs=content.breadcrumbs,
         container=content.container,
     )
+    html = prefix_root_paths(html, config.SITE_BASE_PATH)
 
     out_path = out_root / page_rel
     if config.DRY_RUN:
