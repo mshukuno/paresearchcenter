@@ -56,8 +56,19 @@ def sync_assets(out_root: Path = SITE_OUT) -> dict[str, int]:
             shutil.copy2(src, dst)
         copied_root += 1
     stats["root_files"] = copied_root
+    _ensure_nojekyll(out_root)
 
     return stats
+
+
+def _ensure_nojekyll(out_root: Path) -> None:
+    """Tell GitHub Pages to skip Jekyll when deploying from branch."""
+    path = out_root / ".nojekyll"
+    if config.DRY_RUN:
+        print("[DRY RUN] Would write .nojekyll")
+        return
+    out_root.mkdir(parents=True, exist_ok=True)
+    path.touch(exist_ok=True)
 
 
 def print_sync_report(stats: dict[str, int], out_root: Path = SITE_OUT) -> None:

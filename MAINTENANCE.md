@@ -4,7 +4,7 @@ This repo publishes the live site from **`main`**, folder **`/dist`**, via GitHu
 
 ## GitHub Pages setup (first time)
 
-The site is **already built** in `dist/`. GitHub should **not** run Jekyll or any Node.js build.
+The site is **already built** in `dist/`. GitHub should **not** run Jekyll or any Node.js build. The build pipeline writes an empty `dist/.nojekyll` file so branch deploy skips Jekyll.
 
 In the repo **Settings → Pages → Build and deployment**, use **one** of these options:
 
