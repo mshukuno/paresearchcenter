@@ -1,20 +1,28 @@
 # Site maintenance
 
-This repo publishes the live site from **`main`**, folder **`/dist`**, via GitHub Pages. Day-to-day development happens on **`refactor/cleaningup-code`**; `main` should stay a deploy branch with `README.md` and `dist/` only.
+This repo publishes the live site from **`main`**, folder **`/docs`**, via GitHub Pages. Day-to-day development happens on **`refactor/cleaningup-code`**; `main` should stay a deploy branch with `README.md` and `docs/` only.
+
+The pipeline still builds into **`dist/`** on the development branch. Copy `dist/` → `docs/` on `main` when deploying.
 
 ## GitHub Pages setup (first time)
 
-The site is **already built** in `dist/`. GitHub should **not** run Jekyll or any Node.js build. The build pipeline writes an empty `dist/.nojekyll` file so branch deploy skips Jekyll.
+The site is **already built** in `dist/`. GitHub should **not** run Jekyll or any Node.js build. The build pipeline writes an empty `.nojekyll` file (copied into `docs/` on deploy).
 
 In the repo **Settings → Pages → Build and deployment**:
 
 - **Source:** Deploy from a branch
 - **Branch:** `main`
-- **Folder:** `/dist`
+- **Folder:** `/docs`
+
+Click **Save**. After 1–3 minutes, the Pages settings page should show:
+
+> Your site is live at `https://<user>.github.io/paresearchcenter/`
+
+GitHub Pages only supports **`/ (root)`** or **`/docs`** as publish folders — not `/dist`. Using **`/docs`** keeps the repo root clean while matching what Pages expects.
 
 No GitHub Actions workflow is needed. Nothing is built on GitHub.
 
-**Asset paths:** HTML uses root-absolute paths like `/wp-content/...`. On a GitHub **project** site (`https://<user>.github.io/<repo>/`), those must include the repo name. The build defaults to `--site-base /paresearchcenter`. Renaming the publish folder to `/docs` does **not** change the URL — only the repo name in the path matters.
+**Asset paths:** HTML uses root-absolute paths like `/wp-content/...`. On a GitHub **project** site (`https://<user>.github.io/<repo>/`), those must include the repo name. The build defaults to `--site-base /paresearchcenter`. The folder name `docs` does **not** appear in URLs — only the repo name does.
 
 For local preview from `dist/`, rebuild with an empty base:
 
@@ -24,7 +32,7 @@ python src/refactor.py build --site-base ""
 
 For a **custom domain** at the site root, also use `--site-base ""`.
 
-If Pages fails with a Jekyll or Node.js build error, confirm the source is **Deploy from a branch** (not GitHub Actions) and that `dist/.nojekyll` exists on `main`. Disable any auto-added Jekyll workflow under **Actions**.
+If Pages fails with a Jekyll or Node.js build error, confirm the source is **Deploy from a branch** (not GitHub Actions) and that `docs/.nojekyll` exists on `main`. Disable any auto-added Jekyll workflow under **Actions**.
 
 ## Yearly task (start of each year)
 
@@ -37,12 +45,7 @@ From the repo root, on **`refactor/cleaningup-code`**:
 ```powershell
 pip install -r requirements.txt
 python src/refactor.py build
-```
-
-Optional but recommended after `build` (removes assets that are no longer referenced):
-
-```powershell
-python src/refactor.py prune
+python src/refactor.py prune --uploads
 ```
 
 Preview locally if you want to spot-check:
@@ -64,16 +67,21 @@ git commit -m "Rebuild dist for new copyright year."
 git push origin refactor/cleaningup-code
 ```
 
-### 3. Update `main` with the new `dist/`
+### 3. Update `main` with the new `docs/`
 
-Copy only the rebuilt `dist/` folder to `main`. Keep `README.md` on `main`.
+Copy the rebuilt `dist/` contents into `docs/` on `main`. Keep `README.md` at the repo root.
 
 ```powershell
 git fetch origin
 git checkout -B main origin/main
+git rm -rf docs
 git checkout refactor/cleaningup-code -- dist/
+New-Item -ItemType Directory -Force -Path docs | Out-Null
+Get-ChildItem -Path dist -Force | ForEach-Object { Move-Item -LiteralPath $_.FullName -Destination docs/ -Force }
+Remove-Item -Recurse -Force dist
+git add -A
 git status
-git commit -m "Update dist/ for new copyright year."
+git commit -m "Update docs/ for new copyright year."
 git push origin main
 git checkout refactor/cleaningup-code
 ```
