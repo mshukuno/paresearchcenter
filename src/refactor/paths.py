@@ -28,4 +28,8 @@ def prefix_root_paths(html: str, base_path: str) -> str:
 
     for pattern in _ROOT_SLASH_PATTERNS:
         html = pattern.sub(repl, html)
+
+    # Site root links (canonical, home logo) — after general prefixing.
+    html = html.replace('href="/"', f'href="{prefix}/"')
+    html = html.replace("href='/'", f"href='{prefix}/'")
     return html
