@@ -50,6 +50,7 @@ def render_page(page_rel: str, out_root: Path = SITE_OUT) -> Path:
         body_class=content.body_class,
         breadcrumbs=content.breadcrumbs,
         container=content.container,
+        site_base=config.SITE_BASE_PATH,
     )
     html = prefix_root_paths(html, config.SITE_BASE_PATH)
 
@@ -70,6 +71,9 @@ def render_all(out_root: Path = SITE_OUT, *, sync_static: bool = True) -> list[P
         if not page_rel.endswith(".html"):
             page_rel += ".html"
         rendered.append(render_page(page_rel, out_root))
+    from .search_index import build_search_index
+
+    build_search_index(out_root)
     if sync_static:
         sync_assets(out_root)
     return rendered

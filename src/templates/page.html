@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, user-scalable=yes, initial-scale=1.0">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <title>{{ title }}</title>
+<meta name="site-base" content="{{ site_base }}">
 <link rel="icon" href="/wp-content/uploads/2017/08/PARC_final-1.png" type="image/png">
 {% if canonical %}<link rel="canonical" href="{{ canonical }}">{% endif %}
 {% include 'head-assets.html' %}
@@ -20,5 +21,6 @@
 {% include 'footer.html' %}
 </div>
 {% include 'body-scripts.html' %}
+{% include 'site-search.html' %}
 </body>
 </html>
