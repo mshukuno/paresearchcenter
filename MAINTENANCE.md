@@ -69,6 +69,15 @@ git push origin refactor/cleaningup-code
 
 ### 3. Update `main` with the new `docs/`
 
+From **`refactor/cleaningup-code`**, use the publish script (replaces the manual copy steps below):
+
+```powershell
+python scripts/publish_to_main.py -m "Update docs/ for new copyright year." --push
+```
+
+<details>
+<summary>Manual copy (legacy)</summary>
+
 Copy the rebuilt `dist/` contents into `docs/` on `main`. Keep `README.md` at the repo root.
 
 ```powershell
@@ -85,6 +94,8 @@ git commit -m "Update docs/ for new copyright year."
 git push origin main
 git checkout refactor/cleaningup-code
 ```
+
+</details>
 
 ### 4. Verify GitHub Pages
 
