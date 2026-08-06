@@ -1,6 +1,29 @@
 # Site maintenance
 
-This repo publishes the live site from **`main`**, folder **`/dist`**, via GitHub Pages. Day-to-day development happens on **`refactor/cleaningup-code`**; `main` should stay a deploy branch with `README.md` and `dist/` only.
+This repo publishes the live site from **`main`**, folder **`/dist`**, via GitHub Pages. Day-to-day development happens on **`refactor/cleaningup-code`**; `main` should stay a deploy branch with `README.md`, `.github/workflows/`, and `dist/` only.
+
+## GitHub Pages setup (first time)
+
+The site is **already built** in `dist/`. GitHub should **not** run Jekyll or any Node.js build.
+
+In the repo **Settings → Pages → Build and deployment**, use **one** of these options:
+
+### Option A — Deploy from branch (simplest)
+
+- **Source:** Deploy from a branch
+- **Branch:** `main`
+- **Folder:** `/dist`
+
+No GitHub Actions workflow runs. Nothing to build on GitHub.
+
+### Option B — GitHub Actions
+
+- **Source:** GitHub Actions
+- Use the workflow in `.github/workflows/deploy-pages.yml` (uploads `dist/` as-is; no Node/Jekyll)
+
+If Pages fails with a Jekyll or Node.js build error, you likely picked the wrong source. Switch to **Option A** or ensure the custom **deploy-pages** workflow is on `main` (not the default Jekyll workflow).
+
+The Node.js 20 deprecation notice on `actions/checkout` is a warning only; the deploy workflow above does not install or require Node.
 
 ## Yearly task (start of each year)
 
@@ -47,7 +70,7 @@ Copy only the rebuilt `dist/` folder to `main`. Keep `README.md` on `main`.
 ```powershell
 git fetch origin
 git checkout -B main origin/main
-git checkout refactor/cleaningup-code -- dist/
+git checkout refactor/cleaningup-code -- dist/ .github/workflows/deploy-pages.yml
 git status
 git commit -m "Update dist/ for new copyright year."
 git push origin main
@@ -56,10 +79,7 @@ git checkout refactor/cleaningup-code
 
 ### 4. Verify GitHub Pages
 
-In the repo **Settings → Pages**:
-
-- **Source branch:** `main`
-- **Folder:** `/dist`
+See [GitHub Pages setup (first time)](#github-pages-setup-first-time) above.
 
 After the push, allow a minute or two for Pages to redeploy, then check the live site footer.
 
