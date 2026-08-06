@@ -1,0 +1,66 @@
+/*
+Theme Name: Septera Child
+Theme URI: http://paresearchcenter.sdsc.edu/septera-child/
+Description: Septera Child Theme
+Author: SDSC WebDB
+Author URI: http://www.sdsc.edu/services/it/web_db_hosting.html
+Template: septera
+Version: 1.0.0
+License: GNU General Public License v2 or later
+License URI: http://www.gnu.org/licenses/gpl-2.0.html
+Tags: light, dark, two-columns, right-sidebar, responsive-layout, accessibility-ready
+Text Domain: septera-child
+*/
+
+.parc-ft-logo {
+  margin-top: 4rem;
+}
+
+.footer-col {
+  margin: 10% 0 0 5%;
+}
+
+#section-page {
+  width: 90%;
+  margin: 0 10% 2rem 5%;
+}
+
+.main .entry-title, .main .page-title {
+  margin: 0 !important;
+  color: #1ea500;
+}
+
+body{
+	background-color: #d1d3d4 !important;
+	background: #fcc900;
+}
+
+.lp-blocks {
+  background: #f9e37a;
+  background: -webkit-linear-gradient(#f9e37a, #fcc900);
+  background: -o-linear-gradient(#f9e37a, #fcc900);
+  background: -moz-linear-gradient(#f9e37a, #fcc900);
+  background: linear-gradient(#f9e37a, #fcc900);
+}
+
+.lp-boxes {
+  background: #f9e37a;
+  background: -webkit-linear-gradient(#fcc900, #f9e37a);
+  background: -o-linear-gradient(#fcc900, #f9e37a);
+  background: -moz-linear-gradient(#fcc900, #f9e37a);
+  background: linear-gradient(#fcc900, #f9e37a);
+}
+
+#breadcrumbs-container {
+	background-color: #fcc900!important;
+	border: none !important;
+}
+
+h3, h4{
+  color: #00549e!important;
+}
+
+a:link, a:visited {
+  text-decoration: underline
+}
+
