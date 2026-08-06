@@ -158,46 +158,47 @@ def cmd_analyze_refs(_: argparse.Namespace) -> None:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="PARC static site refactor pipeline")
-    parser.add_argument("--dry-run", action="store_true", help="Preview without writing files")
-    parser.add_argument(
+    shared = argparse.ArgumentParser(add_help=False)
+    shared.add_argument("--dry-run", action="store_true", help="Preview without writing files")
+    shared.add_argument(
         "--site-base",
         default=os.environ.get("PARC_SITE_BASE", config.SITE_BASE_PATH),
         help='Prefix for root-absolute URLs (default: /paresearchcenter; use "" for site root)',
     )
     sub = parser.add_subparsers(dest="command", required=True)
 
-    sub.add_parser("inventory", help="Phase 1: scan site/ and report stats")
+    sub.add_parser("inventory", parents=[shared], help="Phase 1: scan site/ and report stats")
 
-    p_partials = sub.add_parser("extract-partials", help="Phase 2: extract shared partials")
+    p_partials = sub.add_parser("extract-partials", parents=[shared], help="Phase 2: extract shared partials")
     p_partials.add_argument(
         "--reference",
         default="site/about-us/index.html",
         help="Reference HTML page (default: site/about-us/index.html)",
     )
 
-    p_content = sub.add_parser("extract-content", help="Phase 3a: extract page content")
+    p_content = sub.add_parser("extract-content", parents=[shared], help="Phase 3a: extract page content")
     p_content.add_argument("--page", help="Single page, e.g. about-us/index.html")
     p_content.add_argument("--all", action="store_true", dest="extract_all", help="Extract all pages")
 
-    p_render = sub.add_parser("render-page", help="Phase 3b: render one page to dist/")
+    p_render = sub.add_parser("render-page", parents=[shared], help="Phase 3b: render one page to dist/")
     p_render.add_argument("--page", required=True, help="Page to render, e.g. about-us/index.html")
 
-    p_render_all = sub.add_parser("render-all", help="Phase 3b: render all extracted pages to dist/")
+    p_render_all = sub.add_parser("render-all", parents=[shared], help="Phase 3b: render all extracted pages to dist/")
     p_render_all.add_argument(
         "--no-assets",
         action="store_true",
         help="Skip copying wp-content/ and wp-includes/ into dist/",
     )
 
-    sub.add_parser("sync-assets", help="Copy static assets from site/ into dist/")
-    sub.add_parser("build", help="Render all pages and sync assets (full dist/)")
+    sub.add_parser("sync-assets", parents=[shared], help="Copy static assets from site/ into dist/")
+    sub.add_parser("build", parents=[shared], help="Render all pages and sync assets (full dist/)")
 
-    p_prune = sub.add_parser("prune", help="Clean partials, rebuild HTML, delete dead assets")
+    p_prune = sub.add_parser("prune", parents=[shared], help="Clean partials, rebuild HTML, delete dead assets")
     p_prune.add_argument("--uploads", action="store_true", help="Also remove unreferenced upload files")
     p_prune.add_argument("--skip-partials", action="store_true", help="Skip cleaning src/partials/")
     p_prune.add_argument("--skip-rebuild", action="store_true", help="Skip rebuilding HTML before pruning")
 
-    sub.add_parser("analyze-refs", help="Show referenced vs unreferenced assets in dist/")
+    sub.add_parser("analyze-refs", parents=[shared], help="Show referenced vs unreferenced assets in dist/")
 
     args = parser.parse_args()
     if args.dry_run:
