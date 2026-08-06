@@ -8,11 +8,11 @@
 
 @font-face {
   font-family: 'iconmeta';
-  src:  url('/wp-content/themes/septera/resources/fonts/iconmeta.eot?o7tart');
-  src:  url('/wp-content/themes/septera/resources/fonts/iconmeta.eot?o7tart#iefix') format('embedded-opentype'),
-        url('/wp-content/themes/septera/resources/fonts/iconmeta.ttf?o7tart') format('truetype'),
-        url('/wp-content/themes/septera/resources/fonts/iconmeta.woff?o7tart') format('woff'),
-        url('/wp-content/themes/septera/resources/fonts/iconmeta.svg?o7tart#iconmeta') format('svg');
+  src:  url('/paresearchcenter/wp-content/themes/septera/resources/fonts/iconmeta.eot?o7tart');
+  src:  url('/paresearchcenter/wp-content/themes/septera/resources/fonts/iconmeta.eot?o7tart#iefix') format('embedded-opentype'),
+        url('/paresearchcenter/wp-content/themes/septera/resources/fonts/iconmeta.ttf?o7tart') format('truetype'),
+        url('/paresearchcenter/wp-content/themes/septera/resources/fonts/iconmeta.woff?o7tart') format('woff'),
+        url('/paresearchcenter/wp-content/themes/septera/resources/fonts/iconmeta.svg?o7tart#iconmeta') format('svg');
   font-weight: normal;
   font-style: normal;
 }
@@ -717,11 +717,11 @@
 /* Social Icons */
 @font-face {
     font-family: 'socials';
-    src: url('/wp-content/themes/septera/resources/fonts/socials.eot');
-    src: url('/wp-content/themes/septera/resources/fonts/socials.eot#iefix') format('embedded-opentype'),
-         url('/wp-content/themes/septera/resources/fonts/socials.woff') format('woff'),
-         url('/wp-content/themes/septera/resources/fonts/socials.ttf') format('truetype'),
-         url('/wp-content/themes/septera/resources/fonts/socials.svg#socials') format('svg');
+    src: url('/paresearchcenter/wp-content/themes/septera/resources/fonts/socials.eot');
+    src: url('/paresearchcenter/wp-content/themes/septera/resources/fonts/socials.eot#iefix') format('embedded-opentype'),
+         url('/paresearchcenter/wp-content/themes/septera/resources/fonts/socials.woff') format('woff'),
+         url('/paresearchcenter/wp-content/themes/septera/resources/fonts/socials.ttf') format('truetype'),
+         url('/paresearchcenter/wp-content/themes/septera/resources/fonts/socials.svg#socials') format('svg');
     font-weight: normal;
     font-style: normal;
 }
@@ -789,7 +789,7 @@
 .socials a[href*="vk.com"]:before, .socials a.vk:before { content: '\e82b'; }
 .socials a[href*="plancast.com"]:before, .socials a.plancast:before { content: '\e82c'; }
 .socials a[href*="disqus.com"]:before, .socials a.disqus:before { content: '\e82d'; }
-.socials a[href*="/feed"]:before, .socials a[href*="/rss"]:before, .socials a.rss:before, .socials a.feed:before { content: '\e82e'; }
+.socials a[href*="/paresearchcenter/feed"]:before, .socials a[href*="/paresearchcenter/rss"]:before, .socials a.rss:before, .socials a.feed:before { content: '\e82e'; }
 .socials a[href^="callto:"]:before, .socials a.skype:before { content: '\e82f'; }
 .socials a[href*="twitter.com"]:before, .socials a.twitter:before { content: '\e830'; }
 .socials a[href*="youtube.com"]:before, .socials a.youtube:before { content: '\e831'; }
@@ -957,11 +957,11 @@
 /* Blocks font */
 @font-face {
     font-family: 'septera-blocks';
-    src: url('/wp-content/themes/septera/resources/fonts/blocks.eot');
-    src: url('/wp-content/themes/septera/resources/fonts/blocks.eot#iefix') format('embedded-opentype'),
-        url('/wp-content/themes/septera/resources/fonts/blocks.woff') format('woff'),
-        url('/wp-content/themes/septera/resources/fonts/blocks.ttf') format('truetype'),
-        url('/wp-content/themes/septera/resources/fonts/blocks.svg#blocks') format('svg');
+    src: url('/paresearchcenter/wp-content/themes/septera/resources/fonts/blocks.eot');
+    src: url('/paresearchcenter/wp-content/themes/septera/resources/fonts/blocks.eot#iefix') format('embedded-opentype'),
+        url('/paresearchcenter/wp-content/themes/septera/resources/fonts/blocks.woff') format('woff'),
+        url('/paresearchcenter/wp-content/themes/septera/resources/fonts/blocks.ttf') format('truetype'),
+        url('/paresearchcenter/wp-content/themes/septera/resources/fonts/blocks.svg#blocks') format('svg');
     font-weight: normal;
     font-style: normal;
 }

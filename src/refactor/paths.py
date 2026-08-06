@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import re
+from pathlib import Path
 
 # Match root-absolute paths, but not closing "/>" on HTML tags.
 _ROOT_SLASH_PATTERNS = (
@@ -19,10 +20,14 @@ def prefix_root_paths(html: str, base_path: str) -> str:
 
     prefix = base_path.rstrip("/")
     plen = len(prefix)
+    base_name = prefix.lstrip("/")
 
     def repl(match: re.Match[str]) -> str:
         idx = match.start()
         if idx >= plen and html[idx - plen : idx] == prefix:
+            return "/"
+        # Already prefixed (/paresearchcenter/... or content="/paresearchcenter").
+        if html[idx + 1 :].startswith(base_name):
             return "/"
         return f"{prefix}/"
 
@@ -33,3 +38,18 @@ def prefix_root_paths(html: str, base_path: str) -> str:
     html = html.replace('href="/"', f'href="{prefix}/"')
     html = html.replace("href='/'", f"href='{prefix}/'")
     return html
+
+
+def prefix_css_files(out_root: Path, base_path: str) -> int:
+    """Prefix root-absolute url(/...) paths inside deployed CSS files."""
+    if not base_path:
+        return 0
+
+    updated = 0
+    for path in out_root.rglob("*.css"):
+        text = path.read_text(encoding="utf-8")
+        fixed = prefix_root_paths(text, base_path)
+        if fixed != text:
+            path.write_text(fixed, encoding="utf-8")
+            updated += 1
+    return updated

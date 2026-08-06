@@ -10,7 +10,7 @@ from . import config
 from .config import CONTENT_DIR, PARTIALS_DIR, SITE_OUT, SITE_SRC, TEMPLATES_DIR
 from .assets import sync_assets
 from .extract import PageContent, extract_page_content, save_page_content
-from .paths import prefix_root_paths
+from .paths import prefix_css_files, prefix_root_paths
 
 
 def _env() -> Environment:
@@ -76,6 +76,7 @@ def render_all(out_root: Path = SITE_OUT, *, sync_static: bool = True) -> list[P
     build_search_index(out_root)
     if sync_static:
         sync_assets(out_root)
+    prefix_css_files(out_root, config.SITE_BASE_PATH)
     return rendered
 
 

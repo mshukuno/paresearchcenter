@@ -5,7 +5,7 @@ import re
 from dataclasses import dataclass, field
 from pathlib import Path
 
-ASSET_PAT = re.compile(r'(?:/wp-content/[^\s"\'<>]+|/wp-includes/[^\s"\'<>]+)')
+ASSET_PAT = re.compile(r"/wp-content/[^\s\"'<>]+|/wp-includes/[^\s\"'<>]+")
 SOURCE_URL_PAT = re.compile(r"sourceURL=([^\s*/][^\s*]+)")
 
 # Invalid plugin names from prefetch patterns like /wp-content/*
@@ -31,25 +31,30 @@ class ReferenceReport:
         return out
 
 
+def _collect_asset_urls(text: str, report: ReferenceReport) -> None:
+    for match in ASSET_PAT.findall(text):
+        url = match.split("?")[0]
+        report.asset_urls.add(url)
+        if url.startswith("/wp-content/plugins/"):
+            parts = url.split("/")
+            if len(parts) > 3:
+                report.plugins.add(parts[3])
+        elif url.startswith("/wp-content/themes/"):
+            parts = url.split("/")
+            if len(parts) > 3:
+                report.themes.add(parts[3])
+        elif url.startswith("/wp-includes/"):
+            report.includes_urls.add(url)
+        elif "/wp-content/uploads/" in url:
+            report.upload_paths.add(url.split("/wp-content/uploads/", 1)[1])
+
+
 def collect_references(root: Path) -> ReferenceReport:
     report = ReferenceReport(root=root)
     for html in root.rglob("*.html"):
-        text = html.read_text(encoding="utf-8", errors="replace")
-        for match in ASSET_PAT.findall(text):
-            url = match.split("?")[0]
-            report.asset_urls.add(url)
-            if url.startswith("/wp-content/plugins/"):
-                parts = url.split("/")
-                if len(parts) > 3:
-                    report.plugins.add(parts[3])
-            elif url.startswith("/wp-content/themes/"):
-                parts = url.split("/")
-                if len(parts) > 3:
-                    report.themes.add(parts[3])
-            elif url.startswith("/wp-includes/"):
-                report.includes_urls.add(url)
-            elif "/wp-content/uploads/" in url:
-                report.upload_paths.add(url.split("/wp-content/uploads/", 1)[1])
+        _collect_asset_urls(html.read_text(encoding="utf-8", errors="replace"), report)
+    for css in root.rglob("*.css"):
+        _collect_asset_urls(css.read_text(encoding="utf-8", errors="replace"), report)
 
     report.plugins -= _INVALID_PLUGINS
     return report
