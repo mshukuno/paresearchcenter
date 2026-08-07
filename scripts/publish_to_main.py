@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build dist/ and publish the static site to main as docs/ only."""
+"""Build dist/, light cleanup, and publish the static site to main as docs/ only."""
 from __future__ import annotations
 
 import argparse
@@ -74,6 +74,13 @@ def pop_stash_if_any() -> None:
     listed = run(["git", "stash", "list"], check=False).stdout
     if STASH_MESSAGE not in listed:
         return
+    if current_branch() != DEV_BRANCH:
+        print(
+            f"Warning: not on {DEV_BRANCH}; leaving stash in place. "
+            f"Run `git checkout {DEV_BRANCH}` then `git stash pop`.",
+            file=sys.stderr,
+        )
+        return
     print("Restoring stashed local changes…")
     result = run(["git", "stash", "pop"], check=False)
     if result.returncode != 0:
@@ -87,23 +94,31 @@ def checkout_branch(name: str) -> None:
     run(["git", "checkout", name])
 
 
-def build_site(*, skip_build: bool) -> None:
+def build_site(*, skip_build: bool, skip_cleanup: bool) -> None:
     if not skip_build:
         run([sys.executable, "src/refactor.py", "build", "--site-base", "/paresearchcenter"])
+    if not skip_cleanup:
+        run([sys.executable, "scripts/cleanup_dist.py"])
     run([sys.executable, "scripts/patch_search_page.py"])
     run([sys.executable, "scripts/rebuild_search_index.py"])
     run([sys.executable, "scripts/install_site_search_js.py"])
+    run([sys.executable, "scripts/build_archive_pages.py"])
 
 
 def copy_tree(src: Path, dst: Path) -> None:
     if dst.exists():
-        shutil.rmtree(dst)
+        shutil.rmtree(dst, ignore_errors=True)
+    if dst.exists():
+        # Windows file locks can block rmtree; remove tracked files via git first.
+        run(["git", "rm", "-rf", "--ignore-unmatch", "docs"], check=False)
+        if dst.exists():
+            shutil.rmtree(dst, ignore_errors=True)
     shutil.copytree(src, dst)
 
 
-def update_main_tree(staging: Path, *, message: str, push: bool) -> None:
+def update_main_tree(staging: Path, *, message: str, push: bool, readme_text: str) -> None:
     copy_tree(staging, DOCS_DIR)
-    (REPO_ROOT / "README.md").write_text(load_main_readme(), encoding="utf-8")
+    (REPO_ROOT / "README.md").write_text(readme_text, encoding="utf-8")
 
     run(["git", "add", "docs", "README.md"])
     for rel in DEV_ONLY_PATHS:
@@ -126,11 +141,12 @@ def clean_main_layout(*, push: bool, message: str) -> None:
         raise SystemExit(f"Run from {DEV_BRANCH} (current: {branch})")
 
     stashed = stash_if_dirty()
+    readme_text = load_main_readme()
     try:
         run(["git", "fetch", "origin"])
         checkout_branch(MAIN_BRANCH)
         try:
-            (REPO_ROOT / "README.md").write_text(load_main_readme(), encoding="utf-8")
+            (REPO_ROOT / "README.md").write_text(readme_text, encoding="utf-8")
             run(["git", "add", "README.md"])
             for rel in DEV_ONLY_PATHS:
                 run(["git", "rm", "-rf", "--ignore-unmatch", rel])
@@ -154,11 +170,12 @@ def update_main_readme(*, message: str, push: bool) -> None:
         raise SystemExit(f"Run from {DEV_BRANCH} (current: {branch})")
 
     stashed = stash_if_dirty()
+    readme_text = load_main_readme()
     try:
         run(["git", "fetch", "origin"])
         checkout_branch(MAIN_BRANCH)
         try:
-            (REPO_ROOT / "README.md").write_text(load_main_readme(), encoding="utf-8")
+            (REPO_ROOT / "README.md").write_text(readme_text, encoding="utf-8")
             run(["git", "add", "README.md"])
             status = run(["git", "status", "--porcelain"]).stdout.strip()
             if not status:
@@ -174,16 +191,23 @@ def update_main_readme(*, message: str, push: bool) -> None:
             pop_stash_if_any()
 
 
-def publish(*, message: str, push: bool, skip_build: bool) -> None:
+def publish(
+    *,
+    message: str,
+    push: bool,
+    skip_build: bool,
+    skip_cleanup: bool,
+) -> None:
     branch = current_branch()
     if branch != DEV_BRANCH:
         raise SystemExit(f"Run from {DEV_BRANCH} (current: {branch})")
 
-    if skip_build:
-        if not SITE_OUT.is_dir():
-            raise SystemExit(f"Missing build output: {SITE_OUT}")
-    else:
-        build_site(skip_build=False)
+    if skip_build and not SITE_OUT.is_dir():
+        raise SystemExit(f"Missing build output: {SITE_OUT}")
+
+    build_site(skip_build=skip_build, skip_cleanup=skip_cleanup)
+
+    readme_text = load_main_readme()
 
     with tempfile.TemporaryDirectory(prefix="parc-publish-") as tmp:
         staging = Path(tmp) / "dist"
@@ -191,16 +215,24 @@ def publish(*, message: str, push: bool, skip_build: bool) -> None:
         (staging / ".nojekyll").touch(exist_ok=True)
 
         stashed = stash_if_dirty()
+        on_dev_branch = False
         try:
             run(["git", "fetch", "origin"])
             checkout_branch(MAIN_BRANCH)
             try:
-                update_main_tree(staging, message=message, push=push)
+                update_main_tree(staging, message=message, push=push, readme_text=readme_text)
             finally:
                 checkout_branch(DEV_BRANCH)
+                on_dev_branch = True
         finally:
-            if stashed:
+            if stashed and on_dev_branch:
                 pop_stash_if_any()
+            elif stashed:
+                print(
+                    f"Warning: publish interrupted before returning to {DEV_BRANCH}. "
+                    "Stash kept — finish checkout, then run `git stash pop`.",
+                    file=sys.stderr,
+                )
 
 
 def main() -> None:
@@ -215,7 +247,12 @@ def main() -> None:
     parser.add_argument(
         "--skip-build",
         action="store_true",
-        help="Reuse existing dist/ (still runs search index + script install)",
+        help="Reuse existing dist/ (still runs cleanup + search unless --skip-cleanup)",
+    )
+    parser.add_argument(
+        "--skip-cleanup",
+        action="store_true",
+        help="Skip plugin/MonsterInsights cleanup",
     )
     parser.add_argument(
         "--build-only",
@@ -250,10 +287,15 @@ def main() -> None:
             return
 
         if args.build_only:
-            build_site(skip_build=args.skip_build)
+            build_site(skip_build=args.skip_build, skip_cleanup=args.skip_cleanup)
             return
 
-        publish(message=args.message, push=args.push, skip_build=args.skip_build)
+        publish(
+            message=args.message,
+            push=args.push,
+            skip_build=args.skip_build,
+            skip_cleanup=args.skip_cleanup,
+        )
     except GitError as exc:
         raise SystemExit(str(exc)) from exc
 

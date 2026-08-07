@@ -1,43 +1,41 @@
 # paresearchcenter
 
-Static site refactor and build pipeline for [Physical Activity Research Center](https://mshukuno.github.io/paresearchcenter/).
+Static site for [Physical Activity Research Center](https://ncsu-cga-sc.github.io/paresearchcenter/), published on GitHub Pages.
 
 ## Branches
 
 | Branch | Purpose |
 |--------|---------|
-| **`main`** | GitHub Pages deploy — **`docs/` only** |
-| **`refactor/cleaningup-code`** | Development — `src/`, `scripts/`, `site/`, `dist/` |
+| **`main`** | GitHub Pages — **`docs/`** and **`README.md`** only |
+| **`refactor/cleaningup-code`** | Development — `site/`, `src/`, `scripts/`, `dist/` |
 
-## Quick start (development branch)
+## Quick start
+
+On **`refactor/cleaningup-code`**:
 
 ```powershell
 pip install -r requirements.txt
-python src/refactor.py build --site-base /paresearchcenter
-python scripts/rebuild_search_index.py
-python scripts/install_site_search_js.py
+python scripts/publish_to_main.py --build-only
 ```
 
-Preview:
+Preview (matches GitHub Pages URLs):
 
 ```powershell
-cd dist
-python -m http.server 8000
+python scripts/preview_server.py
 ```
+
+Open http://localhost:8000/paresearchcenter/
+
+Do **not** use `cd dist && python -m http.server` — HTML assets use the `/paresearchcenter/` prefix and will 404 without the preview script.
 
 ## Publish to GitHub Pages
 
-From **`refactor/cleaningup-code`**:
-
 ```powershell
-# Full rebuild + copy dist/ → main/docs/ + commit
 python scripts/publish_to_main.py -m "Update site" --push
 ```
 
-One-time cleanup if `main` still has `scripts/` or `src/` (keeps existing `docs/`):
+This runs **build → light cleanup → search assets → copy to `docs/` on `main`**.
 
-```powershell
-python scripts/publish_to_main.py --clean-main-only --push
-```
+Light cleanup removes unused WordPress plugin folders, GoDaddy `mu-plugins`, and MonsterInsights tracking snippets. It does **not** delete uploads or trim `wp-includes/`.
 
-See [MAINTENANCE.md](MAINTENANCE.md) and [REFACTOR.md](REFACTOR.md) for details.
+See [MAINTENANCE.md](MAINTENANCE.md) for GitHub Pages settings and yearly copyright updates.

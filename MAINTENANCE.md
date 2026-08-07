@@ -44,8 +44,7 @@ From the repo root, on **`refactor/cleaningup-code`**:
 
 ```powershell
 pip install -r requirements.txt
-python src/refactor.py build
-python src/refactor.py prune --uploads
+python scripts/publish_to_main.py --build-only
 ```
 
 Preview locally if you want to spot-check:

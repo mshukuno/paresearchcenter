@@ -1,67 +1,49 @@
-# Static site refactor & cleaning
+# Static site refactor
 
-This repo hosts the PARC website as a **static export** from WordPress (GoDaddy / Simply Static). The refactor pipeline turns the bloated export into a smaller, maintainable site for GitHub Pages.
+PARC website as a **static export** from WordPress (Simply Static), rebuilt for GitHub Pages.
 
 ## Folders
 
 | Path | Role |
 |------|------|
-| `site/` | **Source export** — original WordPress static dump (~335 MB). Used as input; not deployed. |
-| `dist/` | **Deploy output** — rebuilt HTML + pruned assets (~200 MB). **This is what GitHub Pages serves.** |
-| `src/partials/` | Shared header, footer, head assets, scripts (edit once, rebuild all pages). |
-| `src/content/` | Per-page extracted content (title, breadcrumbs, main body) as JSON. |
-| `src/templates/` | Jinja2 layout (`page.html`). |
+| `site/` | Original WordPress static export (input only) |
+| `dist/` | Build output — copied to `docs/` on `main` for GitHub Pages |
+| `src/partials/` | Shared header, footer, head assets |
+| `src/content/` | Per-page content as JSON |
+| `src/templates/` | Jinja2 layout |
 
-```
-site/  ──extract──►  src/content/ + src/partials/
-                         │
-                         ▼ render + sync-assets
-                      dist/  ──prune──►  smaller dist/
-```
-
-## Prerequisites
+## Quick start
 
 ```powershell
 pip install -r requirements.txt
+python scripts/publish_to_main.py --build-only   # build + cleanup + search → dist/
+cd dist && python -m http.server 8000
 ```
 
-Requires Python 3.10+ and packages: `beautifulsoup4`, `Jinja2`.
-
-## Quick start (full rebuild)
-
-From the repo root:
+## Publish
 
 ```powershell
-# 1. One-time setup (if src/content/ or src/partials/ are missing)
-python src/refactor.py extract-partials
-python src/refactor.py extract-content --all
-
-# 2. Build deploy folder
-python src/refactor.py build
-
-# 3. Clean dead WordPress / hosting cruft
-python src/refactor.py prune
-
-# 4. Preview locally
-cd dist
-python -m http.server 8000
+python scripts/publish_to_main.py -m "Update site" --push
 ```
 
-Open http://localhost:8000
+## Cleanup (automatic on publish)
 
-## GitHub Pages
+`scripts/cleanup_dist.py` runs after each build:
 
-- Publish from branch **`refactor/cleaningup-code`** (or `main` after merge).
-- Set **Pages source folder** to **`/dist`**.
+- Strips MonsterInsights (Google Analytics) snippets from HTML
+- Removes unused plugin folders (security, export, cookie consent, etc.)
+- Removes `wp-content/mu-plugins/` (GoDaddy hosting)
 
-After changing content or partials, rebuild and commit:
+Does **not** remove uploads or bulk-trim `wp-includes/`. For aggressive size reduction, `python src/refactor.py prune` is available on the dev branch but is not part of the default publish path.
+
+## Commands
 
 ```powershell
-python src/refactor.py build
-python src/refactor.py prune
-git add dist/ src/
-git commit -m "Rebuild dist after site changes"
-git push
+python src/refactor.py build --site-base /paresearchcenter
+python src/refactor.py render-all --no-assets
+python scripts/cleanup_dist.py
+python src/refactor.py analyze-refs    # audit referenced plugins/assets
+python src/refactor.py prune           # optional; not used by default publish
 ```
 
 ---
@@ -174,18 +156,7 @@ These were used on the original export before the template pipeline existed:
 | `src/delete_meta_section.py` | Remove sidebar Meta widget |
 | `src/remove_stayconnected_widget.py` | Clear Stay Connected footer widget |
 
-Update the `ROOT` path inside each script if re-running against a new export. Prefer `prune` for ongoing maintenance.
-
----
-
-## Size reference
-
-| Stage | Files | Size (approx.) |
-|-------|-------|----------------|
-| `site/` (raw export) | ~6,400 | ~335 MB |
-| `dist/` after `build` | ~6,400 | ~335 MB |
-| `dist/` after `prune` | ~1,900 | ~200 MB |
-| `dist/` after `prune --uploads` | ~1,200 | ~125 MB |
+Update the `ROOT` path inside legacy scripts if re-running against a new export. Day-to-day cleanup uses `scripts/cleanup_dist.py`.
 
 ---
 

@@ -20,8 +20,10 @@ Layout and links are preserved where possible so the site stays usable as the pu
 
 ## Search
 
-Search uses a **client-side index** built from the static HTML pages. It replaces WordPress search in a simplified form and **results may differ** from what the WordPress site showed in ranking, wording, and which pages appear. Results are shown in a blog-style layout on the `/search/` page.
+Search uses a **client-side index** built from the static HTML pages. It replaces WordPress search in a simplified form and **results may differ** from what the WordPress site showed in ranking, wording, and which pages appear. Results are shown on the `/search/` page.
 
 ## Development
 
-Site updates are built on branch `refactor/cleaningup-code` (source export, build scripts, and maintenance tools). That branch publishes static files into `docs/` on `main`.
+Site updates are built on branch **`refactor/cleaningup-code`** (source export, build scripts, and maintenance tools). That branch publishes static files into **`docs/`** on **`main`**.
+
+Build steps: render HTML from templates, remove unused plugins and MonsterInsights tracking, install client-side search, then copy **`dist/`** → **`docs/`**.
